@@ -40,7 +40,6 @@ export default function AdminLayout({ children }) {
     router.push("/login");
   };
 
-  // 1. While checking auth session, show loading spinner
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
@@ -52,7 +51,6 @@ export default function AdminLayout({ children }) {
     );
   }
 
-  // 2. If not logged in or not ADMIN, block access with Access Denied screen
   if (!user || user.role !== "ADMIN") {
     return (
       <div className="min-h-screen bg-[#050505] text-zinc-100 flex items-center justify-center p-4">
@@ -82,7 +80,7 @@ export default function AdminLayout({ children }) {
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 flex">
-      {/* Sidebar */}
+      
       <aside className="w-72 bg-zinc-950 border-r border-zinc-900 flex flex-col hidden md:flex shrink-0">
         <div className="h-20 flex items-center px-8 border-b border-zinc-900 shrink-0 justify-between">
           <Link href="/" className="flex items-center gap-3">
@@ -141,13 +139,11 @@ export default function AdminLayout({ children }) {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        {/* Dynamic Blobs */}
+        
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-900/10 rounded-full mix-blend-screen filter blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-900/10 rounded-full mix-blend-screen filter blur-[100px] pointer-events-none" />
 
-        {/* Top Header */}
         <header className="h-20 bg-zinc-950/50 backdrop-blur-md border-b border-zinc-900/50 flex items-center justify-between px-8 shrink-0 sticky top-0 z-10">
           <div className="flex-1 max-w-xl">
             <div className="relative group">
@@ -172,7 +168,6 @@ export default function AdminLayout({ children }) {
           </div>
         </header>
 
-        {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 relative z-0">
           <div className="max-w-7xl mx-auto">
             {children}

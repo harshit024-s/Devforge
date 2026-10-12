@@ -70,7 +70,7 @@ export default function ContestsPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Banner Section */}
+        
         <div className="relative overflow-hidden rounded-3xl p-8 sm:p-12 mb-12 glass-panel border border-brand-500/20 bg-gradient-to-r from-brand-950/40 via-purple-950/20 to-zinc-950">
           <div className="absolute top-0 right-0 w-96 h-96 bg-brand-600/10 rounded-full blur-3xl pointer-events-none" />
           
@@ -105,7 +105,7 @@ export default function ContestsPage() {
           </div>
         ) : (
           <div className="space-y-12">
-            {/* Live Contests */}
+            
             {liveContests.length > 0 && (
               <section>
                 <div className="flex items-center gap-2 mb-6">
@@ -125,7 +125,6 @@ export default function ContestsPage() {
               </section>
             )}
 
-            {/* Upcoming Contests */}
             <section>
               <h2 className="text-2xl font-bold text-white tracking-tight mb-6">Upcoming Challenges</h2>
               {upcomingContests.length === 0 ? (
@@ -146,7 +145,6 @@ export default function ContestsPage() {
               )}
             </section>
 
-            {/* Past Contests */}
             {endedContests.length > 0 && (
               <section>
                 <h2 className="text-xl font-bold text-zinc-400 tracking-tight mb-6">Past Contests</h2>

@@ -17,7 +17,6 @@ export default function AdminCoursesPage() {
   const [expandedCourse, setExpandedCourse] = useState(null);
   const [showUploader, setShowUploader] = useState(false);
 
-  // Create form state
   const [newCourse, setNewCourse] = useState({
     title: "", description: "", price: "0", isPublished: false,
   });
@@ -73,7 +72,6 @@ export default function AdminCoursesPage() {
     await handleUpdateCourse(course.id, { isPublished: !course.isPublished });
   }
 
-  // Module CRUD
   async function handleAddModule(courseId) {
     try {
       await modulesAPI.create(courseId, { title: "New Module" });
@@ -102,7 +100,6 @@ export default function AdminCoursesPage() {
     }
   }
 
-  // Lesson CRUD
   async function handleAddLesson(moduleId) {
     try {
       await lessonsAPI.create(moduleId, { title: "New Lesson" });
@@ -155,7 +152,6 @@ export default function AdminCoursesPage() {
         </div>
       </div>
 
-      {/* Video Uploader */}
       <AnimatePresence>
         {showUploader && (
           <motion.div
@@ -170,7 +166,6 @@ export default function AdminCoursesPage() {
         )}
       </AnimatePresence>
 
-      {/* Create Course Form */}
       <AnimatePresence>
         {showCreateForm && (
           <motion.div
@@ -239,7 +234,6 @@ export default function AdminCoursesPage() {
         )}
       </AnimatePresence>
 
-      {/* Courses List */}
       {courses.length === 0 ? (
         <div className="glass-panel rounded-2xl p-12 text-center">
           <BookOpen className="h-16 w-16 text-zinc-700 mx-auto mb-4" />
@@ -261,7 +255,7 @@ export default function AdminCoursesPage() {
               layout
               className="glass-panel rounded-2xl overflow-hidden"
             >
-              {/* Course Header */}
+              
               <div className="p-5 flex items-center justify-between">
                 <div className="flex items-center gap-4 flex-1 min-w-0">
                   <button
@@ -313,7 +307,6 @@ export default function AdminCoursesPage() {
                 </div>
               </div>
 
-              {/* Expanded Content: Modules & Lessons */}
               <AnimatePresence>
                 {expandedCourse === course.id && (
                   <motion.div
@@ -323,7 +316,7 @@ export default function AdminCoursesPage() {
                     className="border-t border-zinc-800/50"
                   >
                     <div className="p-5 space-y-4">
-                      {/* Course Edit Fields */}
+                      
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <EditableField
                           label="Title"
@@ -344,7 +337,6 @@ export default function AdminCoursesPage() {
                         onSave={(val) => handleUpdateCourse(course.id, { description: val })}
                       />
 
-                      {/* Modules */}
                       <div className="mt-6">
                         <div className="flex items-center justify-between mb-3">
                           <h4 className="text-sm font-semibold text-zinc-300">Modules</h4>
@@ -390,7 +382,6 @@ export default function AdminCoursesPage() {
                                   </div>
                                 </div>
 
-                                {/* Lessons */}
                                 {mod.lessons?.length > 0 && (
                                   <div className="space-y-2 ml-6">
                                     {mod.lessons.map((lesson, li) => (
@@ -432,7 +423,6 @@ export default function AdminCoursesPage() {
   );
 }
 
-// Inline editable field component
 function EditableField({ label, value, onSave, type = "text", multiline = false, inline = false }) {
   const [editing, setEditing] = useState(false);
   const [tempValue, setTempValue] = useState(value);

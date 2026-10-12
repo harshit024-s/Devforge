@@ -19,7 +19,6 @@ export async function apiFetch(path, options = {}) {
   return data;
 }
 
-// Auth API
 export const authAPI = {
   login: (email, password) =>
     apiFetch("/api/auth/login", {
@@ -36,12 +35,10 @@ export const authAPI = {
   getUser: (userId) => apiFetch(`/api/auth/me/${userId}`),
 };
 
-// Dashboard API
 export const dashboardAPI = {
   getStats: () => apiFetch("/api/dashboard/stats"),
 };
 
-// Courses API (admin)
 export const adminCoursesAPI = {
   getAll: () => apiFetch("/api/admin/courses"),
   getOne: (id) => apiFetch(`/api/admin/courses/${id}`),
@@ -61,7 +58,6 @@ export const adminCoursesAPI = {
     }),
 };
 
-// Module API
 export const modulesAPI = {
   create: (courseId, data) =>
     apiFetch(`/api/admin/courses/${courseId}/modules`, {
@@ -79,7 +75,6 @@ export const modulesAPI = {
     }),
 };
 
-// Lesson API
 export const lessonsAPI = {
   create: (moduleId, data) =>
     apiFetch(`/api/admin/modules/${moduleId}/lessons`, {
@@ -97,7 +92,6 @@ export const lessonsAPI = {
     }),
 };
 
-// Users API (admin)
 export const adminUsersAPI = {
   getAll: (params) => {
     const searchParams = new URLSearchParams();
@@ -118,7 +112,6 @@ export const adminUsersAPI = {
     }),
 };
 
-// Problems API (admin)
 export const adminProblemsAPI = {
   getAll: () => apiFetch("/api/admin/problems"),
   create: (data) =>
@@ -137,7 +130,6 @@ export const adminProblemsAPI = {
     }),
 };
 
-// Public courses API
 export const coursesAPI = {
   getAll: (params) => {
     const searchParams = new URLSearchParams();
@@ -155,7 +147,6 @@ export const coursesAPI = {
     }),
 };
 
-// Problems public API
 export const problemsAPI = {
   getAll: (params) => {
     const searchParams = new URLSearchParams();
@@ -173,7 +164,6 @@ export const problemsAPI = {
     }),
 };
 
-// Checkout API
 export const checkoutAPI = {
   createSession: (data) =>
     apiFetch("/api/checkout/session", {
@@ -182,7 +172,6 @@ export const checkoutAPI = {
     }),
 };
 
-// Contests API
 export const contestsAPI = {
   getAll: () => apiFetch("/api/contests"),
   getBySlug: (slug, userId) => 
@@ -194,10 +183,7 @@ export const contestsAPI = {
     }),
 };
 
-// Leaderboard API
 export const leaderboardAPI = {
   getTop: (page = 1, limit = 50) =>
     apiFetch(`/api/leaderboard?page=${page}&limit=${limit}`),
 };
-
-

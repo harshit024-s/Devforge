@@ -3,7 +3,6 @@ const prisma = require("../lib/prisma");
 
 const router = express.Router();
 
-// GET /api/dashboard/stats — live dashboard statistics
 router.get("/stats", async (req, res) => {
   try {
     const [
@@ -60,7 +59,6 @@ router.get("/stats", async (req, res) => {
       }),
     ]);
 
-    // Calculate total revenue from enrollments (price * enrollments per course)
     let totalRevenue = 0;
     for (const course of courseStats) {
       totalRevenue += course.price * course._count.enrollments;

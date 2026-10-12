@@ -5,7 +5,6 @@ const prisma = require("../src/lib/prisma");
 async function seed() {
   console.log("Seeding database...");
 
-  // Clean existing data
   await prisma.submission.deleteMany();
   await prisma.enrollment.deleteMany();
   await prisma.lesson.deleteMany();
@@ -16,7 +15,6 @@ async function seed() {
 
   const passwordHash = await bcrypt.hash("password123", 10);
 
-  // 1. Create Admin
   const admin = await prisma.user.create({
     data: {
       name: "Alex Vance (Admin)",
@@ -29,7 +27,6 @@ async function seed() {
     },
   });
 
-  // 2. Create Instructor
   const instructor = await prisma.user.create({
     data: {
       name: "Dr. Sarah Connor",
@@ -42,7 +39,6 @@ async function seed() {
     },
   });
 
-  // 3. Create Student
   const student = await prisma.user.create({
     data: {
       name: "Marcus Cole",
@@ -58,7 +54,6 @@ async function seed() {
 
   console.log("Users created:", admin.email, instructor.email, student.email);
 
-  // 4. Create Courses
   const course1 = await prisma.course.create({
     data: {
       title: "Full-Stack Next.js 14 & Node.js Masterclass",
@@ -134,7 +129,7 @@ async function seed() {
       slug: "dsa-python-cpp-accelerator",
       description: "Ace FAANG and Tier-1 engineering interviews. Comprehensive coverage of trees, graphs, dynamic programming, and greedy algorithms.",
       thumbnailUrl: "https://images.unsplash.com/photo-1516116211227-bbc13c7a6e1d?w=800&auto=format&fit=crop&q=80",
-      price: 0, // Free course
+      price: 0, 
       isPublished: true,
       instructorId: admin.id,
       modules: {
@@ -200,7 +195,6 @@ async function seed() {
 
   console.log("Courses created successfully.");
 
-  // 5. Enroll Student in Course 1
   await prisma.enrollment.create({
     data: {
       userId: student.id,
@@ -209,7 +203,6 @@ async function seed() {
     },
   });
 
-  // 6. Create DSA Problems
   const problems = [
     {
       title: "Two Sum",
@@ -267,7 +260,6 @@ async function seed() {
 
   console.log(`Created ${problems.length} DSA problems.`);
 
-  // 7. Create a sample submission
   const twoSum = await prisma.dsaProblem.findUnique({ where: { slug: "two-sum" } });
   if (twoSum) {
     await prisma.submission.create({

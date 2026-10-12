@@ -26,7 +26,6 @@ export default function LoginPage() {
       login(data.data.user);
       setMessage({ type: "success", text: "Login successful! Redirecting..." });
       
-      // Redirect based on role
       setTimeout(() => {
         if (data.data.user.role === "ADMIN") {
           router.push("/admin");
@@ -43,7 +42,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#050505]">
-      {/* Dynamic Background Blobs */}
+      
       <div className="absolute top-0 -left-4 w-96 h-96 bg-brand-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob" />
       <div className="absolute top-0 -right-4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000" />
       <div className="absolute -bottom-8 left-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000" />

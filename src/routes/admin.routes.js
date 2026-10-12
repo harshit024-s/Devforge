@@ -24,10 +24,6 @@ const ALLOWED_IMAGE_TYPES = [
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
 const URL_EXPIRY = 600;
 
-// ═══════════════════════════════════════════
-// UPLOAD ROUTES
-// ═══════════════════════════════════════════
-
 router.post("/get-upload-url", async (req, res) => {
   try {
     const { fileName, fileType, fileSize } = req.body;
@@ -86,11 +82,6 @@ router.post("/get-upload-url", async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════════
-// COURSE CRUD
-// ═══════════════════════════════════════════
-
-// GET all courses (including unpublished — admin view)
 router.get("/courses", async (req, res) => {
   try {
     const courses = await prisma.course.findMany({
@@ -114,7 +105,6 @@ router.get("/courses", async (req, res) => {
   }
 });
 
-// GET single course by ID
 router.get("/courses/:id", async (req, res) => {
   try {
     const course = await prisma.course.findUnique({
@@ -142,7 +132,6 @@ router.get("/courses/:id", async (req, res) => {
   }
 });
 
-// POST create a new course
 router.post("/courses", async (req, res) => {
   try {
     const { title, description, price, thumbnailUrl, instructorId, isPublished } = req.body;
@@ -154,14 +143,12 @@ router.post("/courses", async (req, res) => {
       });
     }
 
-    // Generate a slug from the title
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
       + "-" + crypto.randomUUID().slice(0, 6);
 
-    // If no instructorId provided, use the first admin/instructor user
     let finalInstructorId = instructorId;
     if (!finalInstructorId) {
       const admin = await prisma.user.findFirst({
@@ -169,7 +156,7 @@ router.post("/courses", async (req, res) => {
         select: { id: true },
       });
       if (!admin) {
-        // Create a system admin user
+        
         const bcrypt = require("bcrypt");
         const generateReferralCode = require("../utils/generateReferralCode");
         const systemAdmin = await prisma.user.create({
@@ -210,7 +197,6 @@ router.post("/courses", async (req, res) => {
   }
 });
 
-// PUT update a course
 router.put("/courses/:id", async (req, res) => {
   try {
     const { title, description, price, thumbnailUrl, isPublished } = req.body;
@@ -245,7 +231,6 @@ router.put("/courses/:id", async (req, res) => {
   }
 });
 
-// DELETE a course
 router.delete("/courses/:id", async (req, res) => {
   try {
     await prisma.course.delete({ where: { id: req.params.id } });
@@ -256,16 +241,11 @@ router.delete("/courses/:id", async (req, res) => {
   }
 });
 
-// ═══════════════════════════════════════════
-// MODULE CRUD
-// ═══════════════════════════════════════════
-
 router.post("/courses/:courseId/modules", async (req, res) => {
   try {
     const { title } = req.body;
     const { courseId } = req.params;
 
-    // Get next position
     const maxPos = await prisma.module.findFirst({
       where: { courseId },
       orderBy: { position: "desc" },
@@ -317,10 +297,6 @@ router.delete("/modules/:id", async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to delete module" });
   }
 });
-
-// ═══════════════════════════════════════════
-// LESSON CRUD
-// ═══════════════════════════════════════════
 
 router.post("/modules/:moduleId/lessons", async (req, res) => {
   try {
@@ -384,7 +360,7 @@ router.delete("/lessons/:id", async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to delete lesson" });
   }
 });
-// USER MANAGEMENT
+
 router.get("/users", async (req, res) => {
   try {
     const { page = 1, limit = 50, role, search } = req.query;
@@ -467,10 +443,6 @@ router.delete("/users/:id", async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to delete user" });
   }
 });
-
-// ═══════════════════════════════════════════
-// DSA PROBLEM MANAGEMENT
-// ═══════════════════════════════════════════
 
 router.get("/problems", async (req, res) => {
   try {

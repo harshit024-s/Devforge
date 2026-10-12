@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check localStorage for saved user session
+    
     const savedUser = localStorage.getItem("devforge_user");
     if (savedUser) {
       try {

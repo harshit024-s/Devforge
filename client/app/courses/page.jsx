@@ -39,7 +39,7 @@ export default function CoursesPage() {
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header */}
+        
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -54,7 +54,6 @@ export default function CoursesPage() {
           </p>
         </motion.div>
 
-        {/* Search */}
         <motion.form
           onSubmit={handleSearch}
           initial={{ opacity: 0, y: 10 }}
@@ -74,7 +73,6 @@ export default function CoursesPage() {
           </div>
         </motion.form>
 
-        {/* Course Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <div className="h-8 w-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -100,7 +98,7 @@ export default function CoursesPage() {
               >
                 <Link href={`/courses/${course.slug}`} className="block group">
                   <div className="glass-panel rounded-2xl overflow-hidden hover:border-brand-500/30 transition-all duration-300">
-                    {/* Thumbnail */}
+                    
                     <div className="aspect-video bg-zinc-900 relative overflow-hidden">
                       {course.thumbnailUrl ? (
                         <img
@@ -113,7 +111,7 @@ export default function CoursesPage() {
                           <BookOpen className="h-12 w-12 text-brand-500/50" />
                         </div>
                       )}
-                      {/* Price Badge */}
+                      
                       <div className="absolute top-3 right-3">
                         <span className={`px-3 py-1 rounded-lg text-sm font-bold ${
                           course.price > 0
@@ -125,7 +123,6 @@ export default function CoursesPage() {
                       </div>
                     </div>
 
-                    {/* Content */}
                     <div className="p-6">
                       <h3 className="text-lg font-bold text-white mb-2 group-hover:text-brand-400 transition-colors line-clamp-2">
                         {course.title}

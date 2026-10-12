@@ -93,7 +93,6 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-// Check enrollment status
 router.get("/:id/enrollment-status", async (req, res) => {
   try {
     const { userId } = req.query;
@@ -117,7 +116,6 @@ router.get("/:id/enrollment-status", async (req, res) => {
   }
 });
 
-// Enroll in course
 router.post("/:id/enroll", async (req, res) => {
   try {
     const { userId } = req.body;
@@ -162,4 +160,3 @@ router.post("/:id/enroll", async (req, res) => {
 });
 
 module.exports = router;
-

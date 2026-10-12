@@ -3,7 +3,6 @@ const prisma = require("../lib/prisma");
 
 const router = express.Router();
 
-// GET /api/leaderboard — Top ranked users by points
 router.get("/", async (req, res) => {
   try {
     const { limit = 50, page = 1 } = req.query;

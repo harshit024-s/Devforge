@@ -26,7 +26,6 @@ export default function RegisterPage() {
       const data = await authAPI.register(formData);
       setMessage({ type: "success", text: "Registration successful! Redirecting to login..." });
 
-      // Auto-redirect to login after success
       setTimeout(() => {
         router.push("/login");
       }, 1500);
@@ -39,7 +38,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden bg-[#050505] py-12">
-      {/* Dynamic Background Blobs */}
+      
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/30 rounded-full mix-blend-screen filter blur-[128px] animate-blob" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-600/30 rounded-full mix-blend-screen filter blur-[128px] animate-blob animation-delay-2000" />
 

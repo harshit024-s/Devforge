@@ -49,9 +49,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#050505]">
       <Navbar />
 
-      {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Animated background blobs */}
+        
         <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-brand-600/20 rounded-full mix-blend-screen filter blur-[140px] animate-blob pointer-events-none" />
         <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-purple-600/15 rounded-full mix-blend-screen filter blur-[140px] animate-blob animation-delay-2000 pointer-events-none" />
         <div className="absolute bottom-0 left-1/2 w-[400px] h-[400px] bg-cyan-600/10 rounded-full mix-blend-screen filter blur-[140px] animate-blob animation-delay-4000 pointer-events-none" />
@@ -98,7 +97,6 @@ export default function HomePage() {
             </div>
           </motion.div>
 
-          {/* Floating stats */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
@@ -120,7 +118,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section */}
       <section className="relative py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -160,7 +157,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="relative py-24">
         <div className="absolute inset-0 bg-gradient-to-t from-brand-950/30 to-transparent pointer-events-none" />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -187,7 +183,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-zinc-900 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">

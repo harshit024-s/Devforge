@@ -57,7 +57,6 @@ export default function DsaProblemWorkspace({ problem }) {
   const [submitNotification, setSubmitNotification] = useState(null);
   const editorRef = useRef(null);
 
-  // Set initial starter template based on problem title
   useEffect(() => {
     if (problem) {
       const fnName = problem.slug.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
@@ -91,7 +90,6 @@ console.log(${fnName}([2, 7, 11, 15]));
     }
   }
 
-  // Local execution runner for fast fallback / testing
   function runLocally(sourceCode, language) {
     const startTime = performance.now();
     let logs = [];
@@ -125,7 +123,7 @@ console.log(${fnName}([2, 7, 11, 15]));
         };
       }
     } else {
-      // Simulated compilation output for other languages when external Judge0 API key is not present
+      
       const elapsed = Math.round(performance.now() - startTime + 45);
       return {
         status: "success",
@@ -145,7 +143,6 @@ console.log(${fnName}([2, 7, 11, 15]));
     setRunning(true);
     setResult(null);
 
-    // If Judge0 key is set to a valid non-placeholder key, use Judge0 API
     if (JUDGE0_KEY && JUDGE0_KEY !== "your-rapidapi-key") {
       try {
         const submitRes = await fetch(`${JUDGE0_API}/submissions?base64_encoded=false&wait=false`, {
@@ -195,7 +192,6 @@ console.log(${fnName}([2, 7, 11, 15]));
       }
     }
 
-    // Fast, reliable local execution runner
     setTimeout(() => {
       const localRes = runLocally(sourceCode, selectedLang.value);
       setResult(localRes);
@@ -210,7 +206,6 @@ console.log(${fnName}([2, 7, 11, 15]));
     setSubmitting(true);
     setSubmitNotification(null);
 
-    // First run test cases
     const localRes = runLocally(sourceCode, selectedLang.value);
     setResult(localRes);
 
@@ -255,7 +250,7 @@ console.log(${fnName}([2, 7, 11, 15]));
 
   return (
     <div className="h-screen w-full bg-[#080808] text-zinc-100 flex flex-col overflow-hidden font-sans">
-      {/* Top Bar */}
+      
       <header className="h-14 border-b border-zinc-800/80 bg-zinc-950 px-4 flex items-center justify-between shrink-0 z-20">
         <div className="flex items-center gap-3">
           <Link
@@ -275,7 +270,7 @@ console.log(${fnName}([2, 7, 11, 15]));
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Language Selector */}
+          
           <select
             value={selectedLang.value}
             onChange={handleLanguageChange}
@@ -288,7 +283,6 @@ console.log(${fnName}([2, 7, 11, 15]));
             ))}
           </select>
 
-          {/* Run Code */}
           <button
             onClick={handleRunCode}
             disabled={running}
@@ -302,7 +296,6 @@ console.log(${fnName}([2, 7, 11, 15]));
             Run
           </button>
 
-          {/* Submit */}
           <button
             onClick={handleSubmit}
             disabled={submitting}
@@ -318,9 +311,8 @@ console.log(${fnName}([2, 7, 11, 15]));
         </div>
       </header>
 
-      {/* Main Split Layout */}
       <div className="flex-1 flex min-h-0">
-        {/* Left Pane: Problem Details */}
+        
         <div className="w-1/2 border-r border-zinc-800/80 flex flex-col min-h-0 bg-zinc-950/40">
           <div className="flex border-b border-zinc-800/80 px-4 bg-zinc-950/60">
             <button
@@ -377,12 +369,10 @@ console.log(${fnName}([2, 7, 11, 15]));
               <h2 className="text-2xl font-extrabold text-white">{problem.title}</h2>
             </div>
 
-            {/* Description Body */}
             <div className="text-zinc-300 text-sm leading-relaxed whitespace-pre-wrap font-sans">
               {problem.description}
             </div>
 
-            {/* Tags */}
             {problem.tags?.length > 0 && (
               <div className="pt-4 border-t border-zinc-800/80">
                 <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
@@ -403,15 +393,13 @@ console.log(${fnName}([2, 7, 11, 15]));
           </div>
         </div>
 
-        {/* Right Pane: Code Editor & Execution Drawer */}
         <div className="w-1/2 flex flex-col min-h-0 bg-[#1e1e1e]">
-          {/* Editor Header */}
+          
           <div className="h-9 bg-[#1e1e1e] border-b border-zinc-800/80 px-4 flex items-center justify-between text-xs text-zinc-400">
             <span className="font-mono text-[11px] text-zinc-400">solution.{selectedLang.value === "python" ? "py" : selectedLang.value === "cpp" ? "cpp" : selectedLang.value === "java" ? "java" : "js"}</span>
             <span className="text-[10px] text-zinc-500">Auto-save enabled</span>
           </div>
 
-          {/* Monaco Editor */}
           <div className="flex-1 min-h-0">
             <Editor
               height="100%"
@@ -433,7 +421,6 @@ console.log(${fnName}([2, 7, 11, 15]));
             />
           </div>
 
-          {/* Bottom Terminal Drawer */}
           <div className="h-48 border-t border-zinc-800 bg-zinc-950 flex flex-col min-h-0">
             <div className="h-9 border-b border-zinc-800/80 px-4 flex items-center justify-between bg-zinc-900/50">
               <div className="flex items-center gap-2">

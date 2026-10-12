@@ -3,7 +3,6 @@ const prisma = require("../lib/prisma");
 
 const router = express.Router();
 
-// GET /api/contests — List all upcoming and ongoing contests
 router.get("/", async (req, res) => {
   try {
     const contests = await prisma.contest.findMany({
@@ -38,7 +37,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/contests/:slug — Contest details with registration check
 router.get("/:slug", async (req, res) => {
   try {
     const { slug } = req.params;
@@ -88,7 +86,6 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-// POST /api/contests/:id/register — Register user for a contest
 router.post("/:id/register", async (req, res) => {
   try {
     const { userId } = req.body;

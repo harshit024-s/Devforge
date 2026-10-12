@@ -53,7 +53,6 @@ export default function PracticePage() {
           </p>
         </motion.div>
 
-        {/* Filters */}
         <div className="flex gap-2 mb-8">
           {["", "EASY", "MEDIUM", "HARD"].map((d) => (
             <button

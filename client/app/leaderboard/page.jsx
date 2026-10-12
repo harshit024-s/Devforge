@@ -36,7 +36,7 @@ export default function LeaderboardPage() {
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Header Section */}
+        
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold mb-4">
             <Trophy className="h-4 w-4" />
@@ -56,10 +56,10 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <>
-            {/* Top 3 Podium Cards */}
+            
             {topThree.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 items-end">
-                {/* 2nd Place */}
+                
                 {topThree[1] && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -87,7 +87,6 @@ export default function LeaderboardPage() {
                   </motion.div>
                 )}
 
-                {/* 1st Place (Champion) */}
                 {topThree[0] && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -115,7 +114,6 @@ export default function LeaderboardPage() {
                   </motion.div>
                 )}
 
-                {/* 3rd Place */}
                 {topThree[2] && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -145,7 +143,6 @@ export default function LeaderboardPage() {
               </div>
             )}
 
-            {/* Complete Table Section */}
             <div className="glass-panel rounded-3xl overflow-hidden border border-zinc-800/80 shadow-2xl">
               <div className="p-6 border-b border-zinc-800/80 flex justify-between items-center bg-zinc-950/40">
                 <h2 className="font-bold text-lg text-white flex items-center gap-2">

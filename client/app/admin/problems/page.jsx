@@ -107,7 +107,7 @@ export default function AdminProblemsPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-extrabold text-white tracking-tight">DSA Problems</h1>
@@ -135,7 +135,6 @@ export default function AdminProblemsPage() {
         </div>
       )}
 
-      {/* Problems List */}
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="h-8 w-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -211,7 +210,6 @@ export default function AdminProblemsPage() {
         </div>
       )}
 
-      {/* Create / Edit Modal */}
       <AnimatePresence>
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">

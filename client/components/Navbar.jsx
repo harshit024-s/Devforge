@@ -23,7 +23,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
             <div className="h-8 w-8 rounded-lg bg-brand-600 flex items-center justify-center font-bold text-white shadow-[0_0_15px_rgba(38,60,242,0.5)] text-sm">
               D
@@ -31,7 +31,6 @@ export default function Navbar() {
             <span className="text-lg font-bold tracking-tight text-white">DevForge</span>
           </Link>
 
-          {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
@@ -53,7 +52,6 @@ export default function Navbar() {
             })}
           </div>
 
-          {/* Right Section */}
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
@@ -101,7 +99,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile menu button */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-all"
@@ -111,7 +108,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden bg-zinc-950 border-t border-zinc-800 px-4 py-4 space-y-2">
           {navLinks.map((link) => {

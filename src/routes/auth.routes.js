@@ -97,7 +97,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// POST /api/auth/login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -140,7 +139,6 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Remove passwordHash from response
     const { passwordHash: _, ...userData } = user;
 
     return res.json({
@@ -157,7 +155,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// GET /api/auth/me — get current user by ID (simple session-less approach)
 router.get("/me/:userId", async (req, res) => {
   try {
     const user = await prisma.user.findUnique({

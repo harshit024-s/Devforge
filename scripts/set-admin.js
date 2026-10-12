@@ -13,14 +13,12 @@ async function main() {
 
   const passwordHash = await bcrypt.hash(rawPassword, 10);
 
-  // 1. Demote any existing ADMIN accounts so ONLY your email has admin access
   const demoted = await prisma.user.updateMany({
     where: { role: "ADMIN" },
     data: { role: "STUDENT" },
   });
   console.log(`Demoted ${demoted.count} prior ADMIN user(s) to STUDENT.`);
 
-  // 2. Create or update devforge010@gmail.com as ADMIN
   const existing = await prisma.user.findUnique({
     where: { email: targetEmail },
   });
@@ -49,7 +47,6 @@ async function main() {
     console.log(`Created new sole ADMIN user: ${created.email}`);
   }
 
-  // Print all users and their current roles for verification
   const allUsers = await prisma.user.findMany({
     select: { id: true, email: true, name: true, role: true },
   });

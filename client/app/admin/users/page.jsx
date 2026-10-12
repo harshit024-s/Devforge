@@ -76,7 +76,7 @@ export default function AdminUsersPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      
       <div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">User Management</h1>
         <p className="text-zinc-400 text-sm mt-1">
@@ -95,7 +95,6 @@ export default function AdminUsersPage() {
         </div>
       )}
 
-      {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
         <form onSubmit={handleSearch} className="relative w-full sm:w-96">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
@@ -125,7 +124,6 @@ export default function AdminUsersPage() {
         </div>
       </div>
 
-      {/* Users Table */}
       {loading ? (
         <div className="flex items-center justify-center py-24">
           <div className="h-8 w-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />

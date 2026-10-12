@@ -14,8 +14,8 @@ async function seedContests() {
       title: "DevForge Biweekly Contest 1",
       slug: "devforge-biweekly-contest-1",
       description: "Test your algorithmic speed and accuracy in 90 minutes. 4 challenges spanning Arrays, Dynamic Programming, Graphs, and Trees. Top performers earn 500 bonus points and exclusive badges!",
-      startTime: new Date(now.getTime() - 1000 * 60 * 30), // Started 30 mins ago (LIVE)
-      endTime: new Date(now.getTime() + 1000 * 60 * 60),    // Ends in 60 mins
+      startTime: new Date(now.getTime() - 1000 * 60 * 30), 
+      endTime: new Date(now.getTime() + 1000 * 60 * 60),    
       duration: 90,
       bannerUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80",
     },
@@ -26,7 +26,7 @@ async function seedContests() {
       title: "Weekly Sprint 12: Graph Theory & Shortest Path",
       slug: "weekly-sprint-12",
       description: "Fast-paced algorithmic challenge focusing on BFS, DFS, Dijkstra, and Topological Sort. Sharpen your competitive programming intuition.",
-      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2), // In 2 days
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2), 
       endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2 + 1000 * 60 * 90),
       duration: 90,
       bannerUrl: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80",
@@ -38,14 +38,13 @@ async function seedContests() {
       title: "Global Algorithms Championship 2026",
       slug: "global-algorithms-championship-2026",
       description: "DevForge premiere open championship. Solve hard-level dynamic programming, segment trees, and bitmask state compression.",
-      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7), // In 7 days
+      startTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7), 
       endTime: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 7 + 1000 * 60 * 120),
       duration: 120,
       bannerUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
     },
   });
 
-  // Seed sample registrations
   const students = await prisma.user.findMany({ take: 3 });
   for (const s of students) {
     await prisma.contestRegistration.create({

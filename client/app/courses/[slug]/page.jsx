@@ -136,7 +136,6 @@ export default function CourseDetailPage() {
     <div className="min-h-screen bg-[#050505]">
       <Navbar />
 
-      {/* Hero Section */}
       <div className="relative overflow-hidden border-b border-zinc-800/50">
         <div className="absolute inset-0 bg-gradient-to-b from-brand-950/30 via-zinc-950/40 to-[#050505] pointer-events-none" />
         
@@ -196,7 +195,6 @@ export default function CourseDetailPage() {
               </motion.div>
             </div>
 
-            {/* Price & Action Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -270,7 +268,6 @@ export default function CourseDetailPage() {
         </div>
       </div>
 
-      {/* Notification Banner */}
       {notification && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
           <div className={`p-4 rounded-xl flex items-center justify-between border ${
@@ -291,7 +288,6 @@ export default function CourseDetailPage() {
         </div>
       )}
 
-      {/* Course Curriculum */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <h2 className="text-2xl font-bold text-white mb-6">Course Curriculum</h2>
 
@@ -386,7 +382,6 @@ export default function CourseDetailPage() {
         )}
       </div>
 
-      {/* Lesson Player Modal */}
       <AnimatePresence>
         {activeLesson && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
@@ -412,7 +407,7 @@ export default function CourseDetailPage() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {/* Video Player */}
+                
                 {activeLesson.videoUrl ? (
                   <div className="aspect-video bg-black rounded-xl overflow-hidden relative shadow-lg">
                     <video
@@ -430,7 +425,6 @@ export default function CourseDetailPage() {
                   </div>
                 )}
 
-                {/* Lesson Notes / Content */}
                 <div className="bg-zinc-900/40 p-6 rounded-xl border border-zinc-800/60">
                   <h4 className="text-sm font-semibold uppercase tracking-wider text-zinc-400 mb-3">
                     Lesson Overview & Notes

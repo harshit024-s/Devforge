@@ -114,7 +114,7 @@ router.post("/:slug/submit", async (req, res) => {
     }
 
     if (userRecord && status === "ACCEPTED") {
-      // Check if user already solved it
+      
       const prevAccepted = await prisma.submission.findFirst({
         where: { userId: userRecord.id, problemId: problem.id, status: "ACCEPTED" },
       });
@@ -158,4 +158,3 @@ router.post("/:slug/submit", async (req, res) => {
 });
 
 module.exports = router;
-
