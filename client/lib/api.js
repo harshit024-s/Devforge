@@ -182,3 +182,22 @@ export const checkoutAPI = {
     }),
 };
 
+// Contests API
+export const contestsAPI = {
+  getAll: () => apiFetch("/api/contests"),
+  getBySlug: (slug, userId) => 
+    apiFetch(`/api/contests/${slug}${userId ? `?userId=${userId}` : ""}`),
+  register: (contestId, userId) =>
+    apiFetch(`/api/contests/${contestId}/register`, {
+      method: "POST",
+      body: JSON.stringify({ userId }),
+    }),
+};
+
+// Leaderboard API
+export const leaderboardAPI = {
+  getTop: (page = 1, limit = 50) =>
+    apiFetch(`/api/leaderboard?page=${page}&limit=${limit}`),
+};
+
+

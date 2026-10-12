@@ -51,6 +51,7 @@ model User {
   courses     Course[]     @relation("InstructorCourses")
   enrollments Enrollment[]
   submissions Submission[]
+  contestRegistrations ContestRegistration[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -178,3 +179,40 @@ model Submission {
   @@index([status])
   @@map("submissions")
 }
+
+model Contest {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  startTime   DateTime @map("start_time")
+  endTime     DateTime @map("end_time")
+  duration    Int      @default(90) // in minutes
+  bannerUrl   String?  @map("banner_url")
+  isPublished Boolean  @default(true) @map("is_published")
+
+  registrations ContestRegistration[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([startTime])
+  @@map("contests")
+}
+
+model ContestRegistration {
+  id         String   @id @default(cuid())
+  contestId  String   @map("contest_id")
+  contest    Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score      Int      @default(0)
+  registeredAt DateTime @default(now()) @map("registered_at")
+
+  @@unique([contestId, userId])
+  @@index([contestId])
+  @@index([userId])
+  @@map("contest_registrations")
+}
+

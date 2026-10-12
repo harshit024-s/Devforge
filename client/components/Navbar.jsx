@@ -4,12 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../lib/AuthContext";
 import { useState } from "react";
-import { Menu, X, LogOut, Shield, BookOpen, Code2, Home } from "lucide-react";
+import { Menu, X, LogOut, Shield, BookOpen, Code2, Home, Trophy, Swords } from "lucide-react";
 
 const navLinks = [
   { name: "Home", href: "/", icon: Home },
   { name: "Courses", href: "/courses", icon: BookOpen },
   { name: "Practice", href: "/practice", icon: Code2 },
+  { name: "Contests", href: "/contests", icon: Swords },
+  { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
 ];
 
 export default function Navbar() {
