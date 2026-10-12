@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  INSTRUCTOR
+  ADMIN
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum SubmissionStatus {
+  PENDING
+  ACCEPTED
+  WRONG_ANSWER
+  TIME_LIMIT_EXCEEDED
+  RUNTIME_ERROR
+  COMPILATION_ERROR
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  passwordHash String  @map("password_hash")
+  name         String
+  avatarUrl    String? @map("avatar_url")
+  role         Role    @default(STUDENT)
+  points       Int     @default(0)
+  referralCode String  @unique @map("referral_code")
+
+  referredById String? @map("referred_by_id")
+  referredBy   User?   @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals    User[]  @relation("UserReferrals")
+
+  courses     Course[]     @relation("InstructorCourses")
+  enrollments Enrollment[]
+  submissions Submission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([referralCode])
+  @@index([role])
+  @@index([points(sort: Desc)])
+  @@map("users")
+}
+
+model Course {
+  id           String  @id @default(cuid())
+  title        String
+  slug         String  @unique
+  description  String
+  thumbnailUrl String? @map("thumbnail_url")
+  price        Float   @default(0)
+  isPublished  Boolean @default(false) @map("is_published")
+  instructorId String  @map("instructor_id")
+  instructor   User    @relation("InstructorCourses", fields: [instructorId], references: [id], onDelete: Cascade)
+
+  modules     Module[]
+  enrollments Enrollment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([instructorId])
+  @@index([isPublished])
+  @@map("courses")
+}
+
+model Module {
+  id       String @id @default(cuid())
+  title    String
+  position Int    @default(0)
+
+  courseId String @map("course_id")
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  lessons Lesson[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([courseId, position])
+  @@map("modules")
+}
+
+model Lesson {
+  id        String  @id @default(cuid())
+  title     String
+  content   String?
+  videoUrl  String? @map("video_url")
+  duration  Int?
+  position  Int     @default(0)
+  isPreview Boolean @default(false) @map("is_preview")
+
+  moduleId String @map("module_id")
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([moduleId, position])
+  @@map("lessons")
+}
+
+model Enrollment {
+  id     String           @id @default(cuid())
+  status EnrollmentStatus @default(ACTIVE)
+
+  userId String @map("user_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  courseId String @map("course_id")
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  enrolledAt  DateTime  @default(now()) @map("enrolled_at")
+  completedAt DateTime? @map("completed_at")
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@map("enrollments")
+}
+
+model DsaProblem {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  description String
+  difficulty  Difficulty @default(EASY)
+  tags        String[]
+  points      Int        @default(10)
+
+  submissions Submission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@index([difficulty])
+  @@map("dsa_problems")
+}
+
+model Submission {
+  id       String           @id @default(cuid())
+  code     String
+  language String
+  status   SubmissionStatus @default(PENDING)
+  runtime  Int?
+  memory   Int?
+  userId   String           @map("user_id")
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  problemId String     @map("problem_id")
+  problem   DsaProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  @@index([userId, problemId])
+  @@index([problemId])
+  @@index([status])
+  @@map("submissions")
+}
