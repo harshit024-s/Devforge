@@ -13,7 +13,9 @@ import {
   Search,
   ExternalLink,
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Swords,
+  Trophy
 } from "lucide-react";
 import { useAuth } from "../../lib/AuthContext";
 
@@ -22,6 +24,8 @@ const navigation = [
   { name: "Courses & Media", href: "/admin/courses", icon: Video },
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "DSA Problems", href: "/admin/problems", icon: Code2 },
+  { name: "Contests", href: "/admin/contests", icon: Swords },
+  { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
 ];
 
 export default function AdminLayout({ children }) {

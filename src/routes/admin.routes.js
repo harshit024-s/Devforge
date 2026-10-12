@@ -524,4 +524,87 @@ router.delete("/problems/:id", async (req, res) => {
   }
 });
 
+router.get("/contests", async (req, res) => {
+  try {
+    const contests = await prisma.contest.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: { select: { registrations: true } },
+      },
+    });
+    return res.json({ success: true, data: { contests } });
+  } catch (error) {
+    console.error("[GET /api/admin/contests] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch contests" });
+  }
+});
+
+router.post("/contests", async (req, res) => {
+  try {
+    const { title, description, startTime, endTime, duration, bannerUrl, isPublished } = req.body;
+    if (!title || !description || !startTime || !endTime) {
+      return res.status(400).json({ success: false, message: "Title, description, startTime, and endTime are required" });
+    }
+
+    const slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      + "-" + crypto.randomUUID().slice(0, 6);
+
+    const contest = await prisma.contest.create({
+      data: {
+        title,
+        slug,
+        description,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        duration: duration ? parseInt(duration) : 90,
+        bannerUrl: bannerUrl || null,
+        isPublished: isPublished !== undefined ? Boolean(isPublished) : true,
+      },
+    });
+
+    return res.status(201).json({ success: true, data: { contest } });
+  } catch (error) {
+    console.error("[POST /api/admin/contests] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to create contest" });
+  }
+});
+
+router.put("/contests/:id", async (req, res) => {
+  try {
+    const { title, description, startTime, endTime, duration, bannerUrl, isPublished } = req.body;
+    const updateData = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (startTime !== undefined) updateData.startTime = new Date(startTime);
+    if (endTime !== undefined) updateData.endTime = new Date(endTime);
+    if (duration !== undefined) updateData.duration = parseInt(duration);
+    if (bannerUrl !== undefined) updateData.bannerUrl = bannerUrl;
+    if (isPublished !== undefined) updateData.isPublished = Boolean(isPublished);
+
+    const contest = await prisma.contest.update({
+      where: { id: req.params.id },
+      data: updateData,
+    });
+
+    return res.json({ success: true, data: { contest } });
+  } catch (error) {
+    console.error("[PUT /api/admin/contests/:id] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update contest" });
+  }
+});
+
+router.delete("/contests/:id", async (req, res) => {
+  try {
+    await prisma.contest.delete({ where: { id: req.params.id } });
+    return res.json({ success: true, message: "Contest deleted" });
+  } catch (error) {
+    console.error("[DELETE /api/admin/contests/:id] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to delete contest" });
+  }
+});
+
 module.exports = router;
+

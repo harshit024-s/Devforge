@@ -130,6 +130,25 @@ export const adminProblemsAPI = {
     }),
 };
 
+export const adminContestsAPI = {
+  getAll: () => apiFetch("/api/admin/contests"),
+  create: (data) =>
+    apiFetch("/api/admin/contests", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id, data) =>
+    apiFetch(`/api/admin/contests/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id) =>
+    apiFetch(`/api/admin/contests/${id}`, {
+      method: "DELETE",
+    }),
+};
+
+
 export const coursesAPI = {
   getAll: (params) => {
     const searchParams = new URLSearchParams();
