@@ -1,7 +1,10 @@
 const configuredApiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-const API_BASE = (/^https?:\/\//i.test(configuredApiBase)
+const hasProtocol = /^https?:\/\//i.test(configuredApiBase);
+const hasDomainOrPort = configuredApiBase.includes(".") || configuredApiBase.includes(":");
+const apiBaseWithProtocol = hasProtocol
   ? configuredApiBase
-  : `https://${configuredApiBase}`).replace(/\/+$/, "");
+  : `https://${configuredApiBase}${hasDomainOrPort ? "" : ".onrender.com"}`;
+const API_BASE = apiBaseWithProtocol.replace(/\/+$/, "");
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`;
