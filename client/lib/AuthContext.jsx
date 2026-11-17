@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { authAPI } from "./api";
 
 const AuthContext = createContext(null);
 
@@ -9,20 +10,68 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
     const savedUser = localStorage.getItem("devforge_user");
     const savedToken = localStorage.getItem("devforge_token");
-    if (savedUser && savedToken) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch {
-        localStorage.removeItem("devforge_user");
-        localStorage.removeItem("devforge_token");
-      }
-    } else {
+    const clearSession = () => {
       localStorage.removeItem("devforge_user");
       localStorage.removeItem("devforge_token");
+    };
+
+    if (!savedUser || !savedToken) {
+      clearSession();
+      setLoading(false);
+      return () => {
+        active = false;
+      };
     }
-    setLoading(false);
+
+    let parsedUser;
+    try {
+      parsedUser = JSON.parse(savedUser);
+    } catch {
+      clearSession();
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!parsedUser?.id) {
+      clearSession();
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    authAPI.getUser(parsedUser.id)
+      .then((response) => {
+        const currentUser = response.data?.user;
+        if (!currentUser) {
+          throw new Error("The authenticated profile response did not include a user.");
+        }
+        if (active) {
+          setUser(currentUser);
+          localStorage.setItem("devforge_user", JSON.stringify(currentUser));
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to refresh the authenticated user profile:", error);
+        if (active && (error.status === 401 || error.status === 403)) {
+          clearSession();
+          setUser(null);
+        } else if (active) {
+          setUser(parsedUser);
+        }
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const login = (userData, token) => {

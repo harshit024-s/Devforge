@@ -22,7 +22,9 @@ export async function apiFetch(path, options = {}) {
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.message || `API error: ${res.status}`);
+    const error = new Error(data.message || `API error: ${res.status}`);
+    error.status = res.status;
+    throw error;
   }
 
   return data;
