@@ -206,3 +206,23 @@ export const leaderboardAPI = {
   getTop: (page = 1, limit = 50) =>
     apiFetch(`/api/leaderboard?page=${page}&limit=${limit}`),
 };
+
+export const contactAPI = {
+  submit: (data) =>
+    apiFetch("/api/contact", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
+export const adminContactAPI = {
+  getAll: () => apiFetch("/api/contact"),
+  toggleResponded: (id) =>
+    apiFetch(`/api/contact/${id}/respond`, {
+      method: "PATCH",
+    }),
+  delete: (id) =>
+    apiFetch(`/api/contact/${id}`, {
+      method: "DELETE",
+    }),
+};

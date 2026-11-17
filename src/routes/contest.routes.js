@@ -12,6 +12,7 @@ router.get("/", async (req, res) => {
         _count: {
           select: { registrations: true },
         },
+
       },
     });
 

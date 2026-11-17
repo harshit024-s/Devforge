@@ -46,7 +46,7 @@ export default function LeaderboardPage() {
             Hall of <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 bg-clip-text text-transparent">Fame</span>
           </h1>
           <p className="text-zinc-400 text-base sm:text-lg mt-3 leading-relaxed">
-            Solve DSA problems, ace biweekly contests, and conquer the coding leaderboard to earn elite developer accolades.
+            Solve DSA problems, ace biweekly contests, and climb the coding leaderboard.
           </p>
         </div>
 

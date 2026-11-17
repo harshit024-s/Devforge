@@ -21,6 +21,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "googleapis": "^183.0.0",
+    "nodemailer": "^10.1.0",
     "stripe": "^23.0.0",
     "zod": "^3.23.8"
   },

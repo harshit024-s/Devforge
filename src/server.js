@@ -9,6 +9,7 @@ const courseRoutes = require("./routes/course.routes");
 const dashboardRoutes = require("./routes/dashboard.routes");
 const leaderboardRoutes = require("./routes/leaderboard.routes");
 const contestRoutes = require("./routes/contest.routes");
+const contactRoutes = require("./routes/contact.routes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,6 +25,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/contests", contestRoutes);
+app.use("/api/contact", contactRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });

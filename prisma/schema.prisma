@@ -216,3 +216,17 @@ model ContestRegistration {
   @@map("contest_registrations")
 }
 
+model ContactMessage {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  mobile     String
+  issue      String
+  isResponded Boolean @default(false) @map("is_responded")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([email])
+  @@index([createdAt(sort: Desc)])
+  @@map("contact_messages")
+}

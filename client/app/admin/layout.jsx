@@ -15,7 +15,8 @@ import {
   ShieldAlert,
   ArrowRight,
   Swords,
-  Trophy
+  Trophy,
+  MessageSquare
 } from "lucide-react";
 import { useAuth } from "../../lib/AuthContext";
 
@@ -25,6 +26,7 @@ const navigation = [
   { name: "Users", href: "/admin/users", icon: Users },
   { name: "DSA Problems", href: "/admin/problems", icon: Code2 },
   { name: "Contests", href: "/admin/contests", icon: Swords },
+  { name: "Messages", href: "/admin/messages", icon: MessageSquare },
   { name: "Leaderboard", href: "/leaderboard", icon: Trophy },
 ];
 
