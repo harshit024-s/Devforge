@@ -11,6 +11,7 @@
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:deploy": "npx prisma migrate deploy",
     "seed": "node scripts/seed.js",
+    "set-admin": "node scripts/set-admin.js",
     "migrate:drive": "node scripts/migrate-drive-to-s3.js"
   },
   "dependencies": {

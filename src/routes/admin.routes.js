@@ -1,11 +1,22 @@
 const express = require("express");
 const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const { PutObjectCommand } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const s3Client = require("../lib/s3");
 const prisma = require("../lib/prisma");
+const generateReferralCode = require("../utils/generateReferralCode");
 
 const router = express.Router();
+
+function makeSlug(text) {
+  const clean = (text || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+  return (clean || "item") + "-" + crypto.randomUUID().slice(0, 6);
+}
 
 const ALLOWED_TYPES = [
   "video/mp4",
@@ -143,11 +154,7 @@ router.post("/courses", async (req, res) => {
       });
     }
 
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-      + "-" + crypto.randomUUID().slice(0, 6);
+    const slug = makeSlug(title);
 
     const finalInstructorId = instructorId || req.authUser.id;
     const instructor = await prisma.user.findFirst({
@@ -195,11 +202,7 @@ router.put("/courses/:id", async (req, res) => {
     const updateData = {};
     if (title !== undefined) {
       updateData.title = title;
-      updateData.slug = title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "")
-        + "-" + crypto.randomUUID().slice(0, 6);
+      updateData.slug = makeSlug(title);
     }
     if (description !== undefined) updateData.description = description;
     if (price !== undefined) updateData.price = parseFloat(price);
@@ -405,6 +408,181 @@ router.get("/users", async (req, res) => {
   }
 });
 
+router.post("/users", async (req, res) => {
+  try {
+    const { name, email, password, role = "STUDENT", points = 0 } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: "Name, email, and password are required" });
+    }
+
+    const normalizedRole = (role || "STUDENT").toUpperCase();
+    if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(normalizedRole)) {
+      return res.status(400).json({ success: false, message: "Invalid role. Allowed: STUDENT, INSTRUCTOR, ADMIN" });
+    }
+
+    const existing = await prisma.user.findUnique({
+      where: { email: email.toLowerCase().trim() },
+    });
+    if (existing) {
+      return res.status(409).json({ success: false, message: "A user with this email already exists" });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const referralCode = await generateReferralCode();
+
+    const user = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: email.toLowerCase().trim(),
+        passwordHash,
+        role: normalizedRole,
+        points: parseInt(points) || 0,
+        referralCode,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        points: true,
+        referralCode: true,
+        createdAt: true,
+      },
+    });
+
+    return res.status(201).json({ success: true, data: { user } });
+  } catch (error) {
+    console.error("[POST /api/admin/users] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to create user" });
+  }
+});
+
+router.put("/users/:id", async (req, res) => {
+  try {
+    const { name, email, role, points, password } = req.body;
+    const updateData = {};
+    if (name !== undefined) updateData.name = name.trim();
+    if (email !== undefined) updateData.email = email.toLowerCase().trim();
+    if (role !== undefined) {
+      const normalizedRole = role.toUpperCase();
+      if (!["STUDENT", "INSTRUCTOR", "ADMIN"].includes(normalizedRole)) {
+        return res.status(400).json({ success: false, message: "Invalid role" });
+      }
+      updateData.role = normalizedRole;
+    }
+    if (points !== undefined) {
+      updateData.points = Math.max(0, parseInt(points) || 0);
+    }
+    if (password && password.trim()) {
+      updateData.passwordHash = await bcrypt.hash(password.trim(), 10);
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: updateData,
+      select: { id: true, name: true, email: true, role: true, points: true },
+    });
+
+    return res.json({ success: true, data: { user } });
+  } catch (error) {
+    console.error("[PUT /api/admin/users/:id] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update user" });
+  }
+});
+
+router.put("/users/:id/points", async (req, res) => {
+  try {
+    const { points, delta } = req.body;
+    let newPoints;
+
+    if (points !== undefined) {
+      newPoints = Math.max(0, parseInt(points) || 0);
+    } else if (delta !== undefined) {
+      const current = await prisma.user.findUnique({
+        where: { id: req.params.id },
+        select: { points: true },
+      });
+      if (!current) return res.status(404).json({ success: false, message: "User not found" });
+      newPoints = Math.max(0, (current.points || 0) + (parseInt(delta) || 0));
+    } else {
+      return res.status(400).json({ success: false, message: "points or delta is required" });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.params.id },
+      data: { points: newPoints },
+      select: { id: true, name: true, email: true, points: true, role: true },
+    });
+
+    return res.json({ success: true, data: { user } });
+  } catch (error) {
+    console.error("[PUT /api/admin/users/:id/points] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update user points" });
+  }
+});
+
+router.get("/leaderboard", async (req, res) => {
+  try {
+    const { page = 1, limit = 50, search } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const where = {};
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        where,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          avatarUrl: true,
+          role: true,
+          points: true,
+          createdAt: true,
+          _count: {
+            select: {
+              submissions: { where: { status: "ACCEPTED" } },
+              enrollments: true,
+            },
+          },
+        },
+        orderBy: [{ points: "desc" }, { createdAt: "asc" }],
+        skip,
+        take: Number(limit),
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    const leaderboard = users.map((u, idx) => ({
+      ...u,
+      rank: skip + idx + 1,
+      problemsSolved: u._count?.submissions || 0,
+      enrolledCourses: u._count?.enrollments || 0,
+    }));
+
+    return res.json({
+      success: true,
+      data: {
+        leaderboard,
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total,
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      },
+    });
+  } catch (error) {
+    console.error("[GET /api/admin/leaderboard] Error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch admin leaderboard" });
+  }
+});
+
 router.put("/users/:id/role", async (req, res) => {
   try {
     const { role } = req.body;
@@ -459,11 +637,7 @@ router.post("/problems", async (req, res) => {
       return res.status(400).json({ success: false, message: "title and description are required" });
     }
 
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-      + "-" + crypto.randomUUID().slice(0, 6);
+    const slug = makeSlug(title);
 
     const problem = await prisma.dsaProblem.create({
       data: {
@@ -537,11 +711,7 @@ router.post("/contests", async (req, res) => {
       return res.status(400).json({ success: false, message: "Title, description, startTime, and endTime are required" });
     }
 
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
-      + "-" + crypto.randomUUID().slice(0, 6);
+    const slug = makeSlug(title);
 
     const contest = await prisma.contest.create({
       data: {

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { 
   Users, Search, Shield, Trash2, Award, UserCheck, 
-  Mail, Calendar, ArrowUpDown, Filter, Sparkles 
+  Mail, Calendar, ArrowUpDown, Filter, Sparkles, UserPlus, Edit3, X 
 } from "lucide-react";
 import { adminUsersAPI } from "../../../lib/api";
 
@@ -22,6 +22,20 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [notification, setNotification] = useState(null);
+
+  // User points edit state
+  const [editingPointsUser, setEditingPointsUser] = useState(null);
+  const [newPointsVal, setNewPointsVal] = useState("");
+
+  // Create user state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createUserForm, setCreateUserForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    role: "STUDENT",
+    points: 0,
+  });
 
   useEffect(() => {
     loadUsers();
@@ -74,14 +88,59 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function handleSavePoints(e) {
+    e.preventDefault();
+    if (!editingPointsUser) return;
+    try {
+      const pts = parseInt(newPointsVal);
+      if (isNaN(pts) || pts < 0) {
+        throw new Error("Points must be a non-negative number.");
+      }
+      await adminUsersAPI.updatePoints(editingPointsUser.id, pts);
+      setNotification({ type: "success", message: `Updated ${editingPointsUser.name}'s points to ${pts}.` });
+      setEditingPointsUser(null);
+      loadUsers();
+    } catch (err) {
+      setNotification({ type: "error", message: err.message || "Failed to update points." });
+    }
+  }
+
+  async function handleCreateUserSubmit(e) {
+    e.preventDefault();
+    try {
+      await adminUsersAPI.create(createUserForm);
+      setNotification({ type: "success", message: `User "${createUserForm.name}" created successfully!` });
+      setShowCreateModal(false);
+      setCreateUserForm({
+        name: "",
+        email: "",
+        password: "",
+        role: "STUDENT",
+        points: 0,
+      });
+      loadUsers();
+    } catch (err) {
+      setNotification({ type: "error", message: err.message || "Failed to create user." });
+    }
+  }
+
   return (
     <div className="space-y-8">
       
-      <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">User Management</h1>
-        <p className="text-zinc-400 text-sm mt-1">
-          View all registered accounts, change user roles, and monitor learner progress.
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">User Management</h1>
+          <p className="text-zinc-400 text-sm mt-1">
+            View all registered accounts, change user roles, edit points, and monitor learner progress.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs transition shadow-lg shadow-brand-900/30 shrink-0"
+        >
+          <UserPlus className="h-4 w-4" />
+          Create User
+        </button>
       </div>
 
       {notification && (
@@ -176,8 +235,18 @@ export default function AdminUsersPage() {
                     </select>
                   </td>
 
-                  <td className="px-6 py-4 hidden sm:table-cell font-medium text-amber-400">
-                    {u.points} pts
+                  <td className="px-6 py-4 hidden sm:table-cell">
+                    <button
+                      onClick={() => {
+                        setEditingPointsUser(u);
+                        setNewPointsVal(String(u.points));
+                      }}
+                      className="group flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 text-amber-400 font-bold transition text-xs"
+                      title="Click to edit user points"
+                    >
+                      <span>{u.points} pts</span>
+                      <Edit3 className="h-3 w-3 opacity-60 group-hover:opacity-100" />
+                    </button>
                   </td>
 
                   <td className="px-6 py-4 hidden md:table-cell font-mono text-xs text-zinc-400">
@@ -225,6 +294,166 @@ export default function AdminUsersPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Edit Points Modal */}
+      {editingPointsUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-sm glass-panel rounded-2xl border border-zinc-700 p-6 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-zinc-800">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <Award className="h-4 w-4 text-amber-400" />
+                Edit Points: {editingPointsUser.name}
+              </h3>
+              <button onClick={() => setEditingPointsUser(null)} className="p-1 text-zinc-500 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSavePoints} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-zinc-400 block mb-1">
+                  Total Points
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  required
+                  value={newPointsVal}
+                  onChange={(e) => setNewPointsVal(e.target.value)}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="flex gap-2">
+                {[100, 250, 500, 1000].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setNewPointsVal(String(preset))}
+                    className="flex-1 py-1.5 rounded-lg text-xs font-semibold bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-300"
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setEditingPointsUser(null)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white"
+                >
+                  Save Points
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-md glass-panel rounded-2xl border border-zinc-700 p-6 space-y-4">
+            <div className="flex justify-between items-center pb-2 border-b border-zinc-800">
+              <h3 className="text-base font-bold text-white flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-brand-400" />
+                Create New User
+              </h3>
+              <button onClick={() => setShowCreateModal(false)} className="p-1 text-zinc-500 hover:text-white">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateUserSubmit} className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-zinc-400 block mb-1">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Priyanshu Verma"
+                  value={createUserForm.name}
+                  onChange={(e) => setCreateUserForm({ ...createUserForm, name: e.target.value })}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-zinc-400 block mb-1">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="priyanshu@example.com"
+                  value={createUserForm.email}
+                  onChange={(e) => setCreateUserForm({ ...createUserForm, email: e.target.value })}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-400 block mb-1">Password</label>
+                  <input
+                    type="password"
+                    required
+                    placeholder="Min 6 characters"
+                    value={createUserForm.password}
+                    onChange={(e) => setCreateUserForm({ ...createUserForm, password: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-400 block mb-1">Starting Points</label>
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={createUserForm.points}
+                    onChange={(e) => setCreateUserForm({ ...createUserForm, points: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-zinc-400 block mb-1">Role</label>
+                <select
+                  value={createUserForm.role}
+                  onChange={(e) => setCreateUserForm({ ...createUserForm, role: e.target.value })}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                >
+                  <option value="STUDENT">STUDENT</option>
+                  <option value="INSTRUCTOR">INSTRUCTOR</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white"
+                >
+                  Create User
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

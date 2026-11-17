@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { apiFetch } from "../lib/api";
 
 const ALLOWED_TYPES = [
   "video/mp4",
@@ -9,7 +10,6 @@ const ALLOWED_TYPES = [
   "video/x-msvideo",
 ];
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export default function VideoUploader() {
   const [file, setFile] = useState(null);
@@ -59,21 +59,14 @@ export default function VideoUploader() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE}/api/admin/get-upload-url`, {
+      const data = await apiFetch("/api/admin/get-upload-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           fileName: file.name,
           fileType: file.type,
           fileSize: file.size,
         }),
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to get upload URL");
-      }
 
       setStatus("uploading");
 

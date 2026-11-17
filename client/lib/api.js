@@ -116,6 +116,34 @@ export const adminUsersAPI = {
     const qs = searchParams.toString();
     return apiFetch(`/api/admin/users${qs ? `?${qs}` : ""}`);
   },
+  create: (data) =>
+    apiFetch("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id, data) =>
+    apiFetch(`/api/admin/users/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  updatePoints: (id, points) =>
+    apiFetch(`/api/admin/users/${id}/points`, {
+      method: "PUT",
+      body: JSON.stringify({ points }),
+    }),
+  addPointsDelta: (id, delta) =>
+    apiFetch(`/api/admin/users/${id}/points`, {
+      method: "PUT",
+      body: JSON.stringify({ delta }),
+    }),
+  getLeaderboard: (params) => {
+    const searchParams = new URLSearchParams();
+    if (params?.page) searchParams.set("page", params.page);
+    if (params?.limit) searchParams.set("limit", params.limit);
+    if (params?.search) searchParams.set("search", params.search);
+    const qs = searchParams.toString();
+    return apiFetch(`/api/admin/leaderboard${qs ? `?${qs}` : ""}`);
+  },
   updateRole: (id, role) =>
     apiFetch(`/api/admin/users/${id}/role`, {
       method: "PUT",

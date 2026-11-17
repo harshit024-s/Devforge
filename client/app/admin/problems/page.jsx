@@ -70,13 +70,13 @@ export default function AdminProblemsPage() {
     e.preventDefault();
     try {
       const payload = {
-        title: formData.title,
-        description: formData.description,
-        difficulty: formData.difficulty,
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        difficulty: (formData.difficulty || "EASY").toUpperCase(),
         tags: formData.tags
           ? formData.tags.split(",").map((t) => t.trim()).filter(Boolean)
           : [],
-        points: parseInt(formData.points) || 10,
+        points: Math.max(1, parseInt(formData.points) || 10),
       };
 
       if (editingProblem) {

@@ -16,9 +16,10 @@ export default function AdminCoursesPage() {
   const [editingCourse, setEditingCourse] = useState(null);
   const [expandedCourse, setExpandedCourse] = useState(null);
   const [showUploader, setShowUploader] = useState(false);
+  const [editingLesson, setEditingLesson] = useState(null);
 
   const [newCourse, setNewCourse] = useState({
-    title: "", description: "", price: "0", isPublished: false,
+    title: "", description: "", price: "0", thumbnailUrl: "", isPublished: false,
   });
 
   useEffect(() => {
@@ -40,11 +41,21 @@ export default function AdminCoursesPage() {
     e.preventDefault();
     try {
       await adminCoursesAPI.create(newCourse);
-      setNewCourse({ title: "", description: "", price: "0", isPublished: false });
+      setNewCourse({ title: "", description: "", price: "0", thumbnailUrl: "", isPublished: false });
       setShowCreateForm(false);
       loadCourses();
     } catch (err) {
       alert("Failed to create course: " + err.message);
+    }
+  }
+
+  async function handleUpdateLesson(id, data) {
+    try {
+      await lessonsAPI.update(id, data);
+      setEditingLesson(null);
+      loadCourses();
+    } catch (err) {
+      alert("Failed to update lesson: " + err.message);
     }
   }
 
@@ -194,6 +205,13 @@ export default function AdminCoursesPage() {
                   className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 px-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
                 />
               </div>
+              <input
+                type="url"
+                value={newCourse.thumbnailUrl}
+                onChange={(e) => setNewCourse({ ...newCourse, thumbnailUrl: e.target.value })}
+                placeholder="Thumbnail Image URL (optional)"
+                className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl py-3 px-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500 transition-all"
+              />
               <textarea
                 required
                 value={newCourse.description}
@@ -317,17 +335,22 @@ export default function AdminCoursesPage() {
                   >
                     <div className="p-5 space-y-4">
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                         <EditableField
                           label="Title"
                           value={course.title}
                           onSave={(val) => handleUpdateCourse(course.id, { title: val })}
                         />
                         <EditableField
-                          label="Price"
+                          label="Price ($)"
                           value={String(course.price)}
                           type="number"
                           onSave={(val) => handleUpdateCourse(course.id, { price: val })}
+                        />
+                        <EditableField
+                          label="Thumbnail URL"
+                          value={course.thumbnailUrl || ""}
+                          onSave={(val) => handleUpdateCourse(course.id, { thumbnailUrl: val })}
                         />
                       </div>
                       <EditableField
@@ -396,12 +419,22 @@ export default function AdminCoursesPage() {
                                             <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-400">Preview</span>
                                           )}
                                         </div>
-                                        <button
-                                          onClick={() => handleDeleteLesson(lesson.id)}
-                                          className="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
-                                        >
-                                          <Trash2 className="h-3 w-3" />
-                                        </button>
+                                        <div className="flex items-center gap-1">
+                                          <button
+                                            onClick={() => setEditingLesson(lesson)}
+                                            className="p-1 rounded text-zinc-500 hover:text-brand-400 hover:bg-brand-500/10 transition-all"
+                                            title="Edit Lesson Details (Video URL, Content)"
+                                          >
+                                            <Pencil className="h-3 w-3" />
+                                          </button>
+                                          <button
+                                            onClick={() => handleDeleteLesson(lesson.id)}
+                                            className="p-1 rounded text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                                            title="Delete Lesson"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </button>
+                                        </div>
                                       </div>
                                     ))}
                                   </div>
@@ -419,6 +452,125 @@ export default function AdminCoursesPage() {
           ))}
         </div>
       )}
+
+      {editingLesson && (
+        <LessonEditModal
+          lesson={editingLesson}
+          onClose={() => setEditingLesson(null)}
+          onSave={(data) => handleUpdateLesson(editingLesson.id, data)}
+        />
+      )}
+    </div>
+  );
+}
+
+function LessonEditModal({ lesson, onClose, onSave }) {
+  const [formData, setFormData] = useState({
+    title: lesson.title || "",
+    videoUrl: lesson.videoUrl || "",
+    content: lesson.content || "",
+    duration: lesson.duration || "",
+    isPreview: lesson.isPreview || false,
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({
+      ...formData,
+      duration: formData.duration ? parseInt(formData.duration) : null,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div className="w-full max-w-lg glass-panel rounded-2xl border border-zinc-700/80 p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+            <Video className="h-5 w-5 text-brand-400" />
+            Edit Lesson Details
+          </h3>
+          <button onClick={onClose} className="p-1 text-zinc-500 hover:text-white rounded-lg">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="text-xs font-semibold text-zinc-400 block mb-1">Lesson Title</label>
+            <input
+              type="text"
+              required
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-zinc-400 block mb-1">Video Stream / Storage URL</label>
+            <input
+              type="text"
+              placeholder="e.g. courses/videos/xxx.mp4 or https://..."
+              value={formData.videoUrl}
+              onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+            />
+            <p className="text-[11px] text-zinc-500 mt-1">Paste the S3 key from Media Uploader or any direct video link.</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold text-zinc-400 block mb-1">Duration (minutes)</label>
+              <input
+                type="number"
+                min="0"
+                value={formData.duration}
+                onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-2.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500"
+              />
+            </div>
+            <div className="flex items-center pt-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.isPreview}
+                  onChange={(e) => setFormData({ ...formData, isPreview: e.target.checked })}
+                  className="rounded border-zinc-700 bg-zinc-900 text-brand-500"
+                />
+                <span className="text-xs font-semibold text-zinc-300">Free Preview Lesson</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-zinc-400 block mb-1">Lesson Content / Notes (Markdown supported)</label>
+            <textarea
+              rows={4}
+              placeholder="Add lesson summary, code snippets, or notes..."
+              value={formData.content}
+              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+              className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-brand-500 resize-none"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-800 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-5 py-2 rounded-xl text-xs font-semibold bg-brand-600 hover:bg-brand-500 text-white transition flex items-center gap-1.5"
+            >
+              <Save className="h-4 w-4" />
+              Save Lesson
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

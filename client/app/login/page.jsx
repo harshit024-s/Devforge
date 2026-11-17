@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
@@ -15,6 +15,18 @@ export default function LoginPage() {
   const [message, setMessage] = useState(null);
   const { login } = useAuth();
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("error") === "admin_required") {
+        setMessage({
+          type: "error",
+          text: "Admin privileges required. Please sign in with an administrator account to access /admin.",
+        });
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

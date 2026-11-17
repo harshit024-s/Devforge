@@ -74,11 +74,30 @@ export default function AdminContestsPage() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
+      const start = new Date(formData.startTime);
+      const end = new Date(formData.endTime);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        throw new Error("Please provide valid start and end dates");
+      }
+      if (end <= start) {
+        throw new Error("End time must be after start time");
+      }
+
+      const payload = {
+        title: formData.title.trim(),
+        description: formData.description.trim(),
+        startTime: start.toISOString(),
+        endTime: end.toISOString(),
+        duration: parseInt(formData.duration) || 90,
+        bannerUrl: formData.bannerUrl?.trim() || null,
+        isPublished: Boolean(formData.isPublished),
+      };
+
       if (editingContest) {
-        await adminContestsAPI.update(editingContest.id, formData);
+        await adminContestsAPI.update(editingContest.id, payload);
         setNotification({ type: "success", message: "Contest updated successfully." });
       } else {
-        await adminContestsAPI.create(formData);
+        await adminContestsAPI.create(payload);
         setNotification({ type: "success", message: "Contest created successfully." });
       }
       setShowModal(false);

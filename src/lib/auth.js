@@ -10,7 +10,7 @@ if (process.env.NODE_ENV === "production" && (!configuredSecret || configuredSec
   throw new Error("AUTH_TOKEN_SECRET must be set to at least 32 characters in production");
 }
 
-const tokenSecret = configuredSecret || crypto.randomBytes(32).toString("hex");
+const tokenSecret = configuredSecret || "devforge-stable-auth-token-secret-fallback-key-32chars";
 
 function createAuthToken(userId) {
   return jwt.sign({}, tokenSecret, {
