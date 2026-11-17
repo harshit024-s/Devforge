@@ -2,8 +2,19 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const prisma = require("../lib/prisma");
 const { z } = require("zod");
+const { requireAuth, requireAdmin } = require("../lib/auth");
 
 const router = express.Router();
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;",
+  })[character]);
+}
 
 const contactSchema = z.object({
   name: z
@@ -39,7 +50,7 @@ router.post("/", async (req, res) => {
     const result = contactSchema.safeParse(req.body);
 
     if (!result.success) {
-      const errors = result.error.flatten().fieldErrors;
+      const errors = z.flattenError(result.error).fieldErrors;
       return res.status(400).json({
         success: false,
         message: "Validation failed",
@@ -57,12 +68,16 @@ router.post("/", async (req, res) => {
     // Send notification email to DevForge support
     try {
       const transporter = createTransporter();
+      const safeName = escapeHtml(name);
+      const safeEmail = escapeHtml(email);
+      const safeMobile = escapeHtml(mobile);
+      const safeIssue = escapeHtml(issue).replace(/\r?\n/g, "<br>");
 
       const mailOptions = {
         from: `"DevForge Contact" <${process.env.CONTACT_EMAIL}>`,
         to: process.env.CONTACT_EMAIL,
         replyTo: email,
-        subject: `[DevForge Contact] New message from ${name}`,
+        subject: `[DevForge Contact] New message from ${name.replace(/[\r\n]+/g, " ")}`,
         html: `
           <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #0a0a0a; color: #e4e4e7; border-radius: 16px; overflow: hidden; border: 1px solid #27272a;">
             <div style="background: linear-gradient(135deg, #263cf2, #7c3aed); padding: 32px 24px; text-align: center;">
@@ -73,19 +88,19 @@ router.post("/", async (req, res) => {
               <table style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; width: 120px; vertical-align: top;">Name</td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #fafafa; font-size: 15px; font-weight: 600;">${name}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #fafafa; font-size: 15px; font-weight: 600;">${safeName}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; vertical-align: top;">Email</td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #fafafa; font-size: 15px;"><a href="mailto:${email}" style="color: #818cf8; text-decoration: none;">${email}</a></td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #fafafa; font-size: 15px;"><a href="mailto:${safeEmail}" style="color: #818cf8; text-decoration: none;">${safeEmail}</a></td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #a1a1aa; font-size: 13px; vertical-align: top;">Mobile</td>
-                  <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #fafafa; font-size: 15px;">${mobile}</td>
+                  <td style="padding: 12px 0; border-bottom: 1px solid #27272a; color: #fafafa; font-size: 15px;">${safeMobile}</td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 0; color: #a1a1aa; font-size: 13px; vertical-align: top;">Issue</td>
-                  <td style="padding: 12px 0; color: #fafafa; font-size: 15px; line-height: 1.6;">${issue.replace(/\n/g, "<br>")}</td>
+                  <td style="padding: 12px 0; color: #fafafa; font-size: 15px; line-height: 1.6;">${safeIssue}</td>
                 </tr>
               </table>
             </div>
@@ -123,7 +138,7 @@ router.post("/", async (req, res) => {
 });
 
 // GET /api/contact — admin endpoint to list all contact messages
-router.get("/", async (req, res) => {
+router.get("/", requireAuth, requireAdmin, async (req, res) => {
   try {
     const messages = await prisma.contactMessage.findMany({
       orderBy: { createdAt: "desc" },
@@ -139,7 +154,7 @@ router.get("/", async (req, res) => {
 });
 
 // PATCH /api/contact/:id/respond — toggle responded status
-router.patch("/:id/respond", async (req, res) => {
+router.patch("/:id/respond", requireAuth, requireAdmin, async (req, res) => {
   try {
     const message = await prisma.contactMessage.findUnique({
       where: { id: req.params.id },
@@ -162,7 +177,7 @@ router.patch("/:id/respond", async (req, res) => {
 });
 
 // DELETE /api/contact/:id — delete a contact message
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", requireAuth, requireAdmin, async (req, res) => {
   try {
     await prisma.contactMessage.delete({ where: { id: req.params.id } });
     return res.json({ success: true, message: "Message deleted" });

@@ -149,29 +149,20 @@ router.post("/courses", async (req, res) => {
       .replace(/(^-|-$)/g, "")
       + "-" + crypto.randomUUID().slice(0, 6);
 
-    let finalInstructorId = instructorId;
-    if (!finalInstructorId) {
-      const admin = await prisma.user.findFirst({
-        where: { role: { in: ["ADMIN", "INSTRUCTOR"] } },
-        select: { id: true },
+    const finalInstructorId = instructorId || req.authUser.id;
+    const instructor = await prisma.user.findFirst({
+      where: {
+        id: finalInstructorId,
+        role: { in: ["ADMIN", "INSTRUCTOR"] },
+      },
+      select: { id: true },
+    });
+
+    if (!instructor) {
+      return res.status(400).json({
+        success: false,
+        message: "Course instructor must be an administrator or instructor",
       });
-      if (!admin) {
-        
-        const bcrypt = require("bcrypt");
-        const generateReferralCode = require("../utils/generateReferralCode");
-        const systemAdmin = await prisma.user.create({
-          data: {
-            name: "System Admin",
-            email: "admin@devforge.com",
-            passwordHash: await bcrypt.hash("admin123", 12),
-            role: "ADMIN",
-            referralCode: await generateReferralCode(),
-          },
-        });
-        finalInstructorId = systemAdmin.id;
-      } else {
-        finalInstructorId = admin.id;
-      }
     }
 
     const course = await prisma.course.create({

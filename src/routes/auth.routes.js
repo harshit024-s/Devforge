@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const prisma = require("../lib/prisma");
 const generateReferralCode = require("../utils/generateReferralCode");
 const { registerSchema } = require("../validators/auth.validator");
+const { createAuthToken, requireAuth } = require("../lib/auth");
 
 const router = express.Router();
 
@@ -140,11 +141,12 @@ router.post("/login", async (req, res) => {
     }
 
     const { passwordHash: _, ...userData } = user;
+    const token = createAuthToken(user.id);
 
     return res.json({
       success: true,
       message: "Login successful",
-      data: { user: userData },
+      data: { user: userData, token },
     });
   } catch (error) {
     console.error("[POST /api/auth/login] Error:", error);
@@ -155,8 +157,12 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/me/:userId", async (req, res) => {
+router.get("/me/:userId", requireAuth, async (req, res) => {
   try {
+    if (req.authUser.id !== req.params.userId) {
+      return res.status(403).json({ success: false, message: "You can only view your own profile" });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: req.params.userId },
       select: {

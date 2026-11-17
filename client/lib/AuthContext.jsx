@@ -9,26 +9,32 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    
     const savedUser = localStorage.getItem("devforge_user");
-    if (savedUser) {
+    const savedToken = localStorage.getItem("devforge_token");
+    if (savedUser && savedToken) {
       try {
         setUser(JSON.parse(savedUser));
-      } catch (e) {
+      } catch {
         localStorage.removeItem("devforge_user");
+        localStorage.removeItem("devforge_token");
       }
+    } else {
+      localStorage.removeItem("devforge_user");
+      localStorage.removeItem("devforge_token");
     }
     setLoading(false);
   }, []);
 
-  const login = (userData) => {
+  const login = (userData, token) => {
     setUser(userData);
     localStorage.setItem("devforge_user", JSON.stringify(userData));
+    localStorage.setItem("devforge_token", token);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem("devforge_user");
+    localStorage.removeItem("devforge_token");
   };
 
   const isAdmin = user?.role === "ADMIN";

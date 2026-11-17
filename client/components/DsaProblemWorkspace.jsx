@@ -212,7 +212,6 @@ console.log(${fnName}([2, 7, 11, 15]));
     try {
       const status = localRes.status === "success" ? "ACCEPTED" : "RUNTIME_ERROR";
       const res = await problemsAPI.submit(problem.slug, {
-        userId: user?.id,
         code: sourceCode,
         language: selectedLang.value,
         status,

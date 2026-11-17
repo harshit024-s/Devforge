@@ -1,7 +1,14 @@
 const Stripe = require("stripe");
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-12-18.acacia",
-});
+function getStripeClient() {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error("STRIPE_SECRET_KEY is not configured");
+  }
 
-module.exports = stripe;
+  return new Stripe(secretKey, {
+    apiVersion: "2024-12-18.acacia",
+  });
+}
+
+module.exports = getStripeClient;

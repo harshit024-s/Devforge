@@ -10,6 +10,7 @@ const dashboardRoutes = require("./routes/dashboard.routes");
 const leaderboardRoutes = require("./routes/leaderboard.routes");
 const contestRoutes = require("./routes/contest.routes");
 const contactRoutes = require("./routes/contact.routes");
+const { requireAuth, requireAdmin } = require("./lib/auth");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
-app.use("/api/admin", adminRoutes);
+app.use("/api/admin", requireAuth, requireAdmin, adminRoutes);
 app.use("/api/checkout", checkoutRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/courses", courseRoutes);

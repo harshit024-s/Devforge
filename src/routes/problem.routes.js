@@ -1,5 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
+const { requireAuth } = require("../lib/auth");
 
 const router = express.Router();
 
@@ -88,10 +89,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/:slug/submit", async (req, res) => {
+router.post("/:slug/submit", requireAuth, async (req, res) => {
   try {
     const { slug } = req.params;
-    const { userId, code, language, status = "ACCEPTED", runtime = 45, memory = 38500 } = req.body;
+    const { code, language, status = "ACCEPTED", runtime = 45, memory = 38500 } = req.body;
+    const userId = req.authUser.id;
 
     if (!code || !language) {
       return res.status(400).json({ success: false, message: "Code and language are required" });
@@ -107,11 +109,7 @@ router.post("/:slug/submit", async (req, res) => {
     }
 
     let pointsEarned = 0;
-    let userRecord = null;
-
-    if (userId) {
-      userRecord = await prisma.user.findUnique({ where: { id: userId } });
-    }
+    const userRecord = await prisma.user.findUnique({ where: { id: userId } });
 
     if (userRecord && status === "ACCEPTED") {
       

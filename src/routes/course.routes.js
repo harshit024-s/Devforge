@@ -1,5 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
+const { requireAuth } = require("../lib/auth");
 
 const router = express.Router();
 
@@ -93,17 +94,12 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-router.get("/:id/enrollment-status", async (req, res) => {
+router.get("/:id/enrollment-status", requireAuth, async (req, res) => {
   try {
-    const { userId } = req.query;
-    if (!userId) {
-      return res.json({ success: true, enrolled: false });
-    }
-
     const enrollment = await prisma.enrollment.findUnique({
       where: {
         userId_courseId: {
-          userId,
+          userId: req.authUser.id,
           courseId: req.params.id,
         },
       },
@@ -116,12 +112,9 @@ router.get("/:id/enrollment-status", async (req, res) => {
   }
 });
 
-router.post("/:id/enroll", async (req, res) => {
+router.post("/:id/enroll", requireAuth, async (req, res) => {
   try {
-    const { userId } = req.body;
-    if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID is required" });
-    }
+    const userId = req.authUser.id;
 
     const course = await prisma.course.findUnique({
       where: { id: req.params.id },

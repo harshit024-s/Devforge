@@ -1,20 +1,33 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
-const stripe = require("../lib/stripe");
+const getStripeClient = require("../lib/stripe");
+const { requireAuth } = require("../lib/auth");
 
 const router = express.Router();
 
 const DISCOUNT_PERCENT = 20;
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+const configuredClientUrl = process.env.CLIENT_URL || "http://localhost:3000";
+const CLIENT_URL = /^https?:\/\//i.test(configuredClientUrl)
+  ? configuredClientUrl
+  : `https://${configuredClientUrl}`;
+const normalizedClientUrl = CLIENT_URL.replace(/\/+$/, "");
 
-router.post("/session", async (req, res) => {
+router.post("/session", requireAuth, async (req, res) => {
   try {
-    const { userId, courseId, inviteCode } = req.body;
+    const { courseId, inviteCode } = req.body || {};
+    const userId = req.authUser.id;
 
-    if (!userId || !courseId) {
+    if (!courseId) {
       return res.status(400).json({
         success: false,
-        message: "userId and courseId are required",
+        message: "courseId is required",
+      });
+    }
+
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return res.status(503).json({
+        success: false,
+        message: "Checkout is not configured",
       });
     }
 
@@ -92,7 +105,7 @@ router.post("/session", async (req, res) => {
 
     const unitAmount = Math.round(finalPrice * 100);
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripeClient().checkout.sessions.create({
       mode: "payment",
       customer_email: user.email,
       line_items: [
@@ -118,8 +131,8 @@ router.post("/session", async (req, res) => {
         originalPrice: String(course.price),
         finalPrice: String(finalPrice),
       },
-      success_url: `${CLIENT_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${CLIENT_URL}/courses/${course.slug}`,
+      success_url: `${normalizedClientUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${normalizedClientUrl}/courses/${course.slug}`,
     });
 
     return res.status(200).json({

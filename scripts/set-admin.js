@@ -1,6 +1,7 @@
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const prisma = require("../src/lib/prisma");
+const generateReferralCode = require("../src/utils/generateReferralCode");
 
 async function main() {
   const targetEmail = (process.argv[2] || process.env.ADMIN_EMAIL || "").toLowerCase().trim();
@@ -12,12 +13,6 @@ async function main() {
   }
 
   const passwordHash = await bcrypt.hash(rawPassword, 10);
-
-  const demoted = await prisma.user.updateMany({
-    where: { role: "ADMIN" },
-    data: { role: "STUDENT" },
-  });
-  console.log(`Demoted ${demoted.count} prior ADMIN user(s) to STUDENT.`);
 
   const existing = await prisma.user.findUnique({
     where: { email: targetEmail },
@@ -39,19 +34,14 @@ async function main() {
         email: targetEmail,
         passwordHash,
         role: "ADMIN",
-        referralCode: "DFADMIN1",
+        referralCode: await generateReferralCode(),
         points: 5000,
         avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
       },
     });
-    console.log(`Created new sole ADMIN user: ${created.email}`);
+    console.log(`Created ADMIN user: ${created.email}`);
   }
 
-  const allUsers = await prisma.user.findMany({
-    select: { id: true, email: true, name: true, role: true },
-  });
-  console.log("Current Users in Database:");
-  console.table(allUsers);
 }
 
 main()

@@ -1,13 +1,22 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const configuredApiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = (/^https?:\/\//i.test(configuredApiBase)
+  ? configuredApiBase
+  : `https://${configuredApiBase}`).replace(/\/+$/, "");
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`;
+  const headers = new Headers(options.headers);
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("devforge_token");
+    if (token) headers.set("Authorization", `Bearer ${token}`);
+  }
+
   const res = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
     ...options,
+    headers,
   });
 
   const data = await res.json();
@@ -37,6 +46,7 @@ export const authAPI = {
 
 export const dashboardAPI = {
   getStats: () => apiFetch("/api/dashboard/stats"),
+  getPublicStats: () => apiFetch("/api/dashboard/public-stats"),
 };
 
 export const adminCoursesAPI = {
@@ -158,11 +168,10 @@ export const coursesAPI = {
     return apiFetch(`/api/courses${qs ? `?${qs}` : ""}`);
   },
   getBySlug: (slug) => apiFetch(`/api/courses/${slug}`),
-  getEnrollmentStatus: (id, userId) => apiFetch(`/api/courses/${id}/enrollment-status?userId=${userId}`),
-  enroll: (id, userId) =>
+  getEnrollmentStatus: (id) => apiFetch(`/api/courses/${id}/enrollment-status`),
+  enroll: (id) =>
     apiFetch(`/api/courses/${id}/enroll`, {
       method: "POST",
-      body: JSON.stringify({ userId }),
     }),
 };
 
@@ -193,12 +202,10 @@ export const checkoutAPI = {
 
 export const contestsAPI = {
   getAll: () => apiFetch("/api/contests"),
-  getBySlug: (slug, userId) => 
-    apiFetch(`/api/contests/${slug}${userId ? `?userId=${userId}` : ""}`),
-  register: (contestId, userId) =>
+  getBySlug: (slug) => apiFetch(`/api/contests/${slug}`),
+  register: (contestId) =>
     apiFetch(`/api/contests/${contestId}/register`, {
       method: "POST",
-      body: JSON.stringify({ userId }),
     }),
 };
 

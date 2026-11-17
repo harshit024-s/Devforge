@@ -1,0 +1,46 @@
+services:
+  - type: web
+    name: devforge-api
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npx prisma migrate deploy && npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: devforge-db
+          property: connectionString
+      - key: AUTH_TOKEN_SECRET
+        sync: false
+      - key: CLIENT_URL
+        fromService:
+          type: web
+          name: devforge-web
+          property: host
+
+  - type: web
+    name: devforge-web
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: client
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    autoDeployTrigger: commit
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: devforge-api
+          property: host
+
+databases:
+  - name: devforge-db
+    databaseName: devforge
+    plan: free
+    region: singapore

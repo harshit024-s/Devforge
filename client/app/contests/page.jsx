@@ -45,7 +45,7 @@ export default function ContestsPage() {
 
     try {
       setRegisteringId(contestId);
-      await contestsAPI.register(contestId, user.id);
+      await contestsAPI.register(contestId);
       setNotification({
         type: "success",
         message: "You are officially registered! Good luck in the competition.",

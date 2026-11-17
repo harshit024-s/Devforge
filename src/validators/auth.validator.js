@@ -2,13 +2,17 @@ const { z } = require("zod");
 
 const registerSchema = z.object({
   name: z
-    .string({ required_error: "Name is required" })
+    .string({
+      error: (issue) => (issue.input === undefined ? "Name is required" : "Name must be a string"),
+    })
     .trim()
     .min(2, "Name must be at least 2 characters")
     .max(100, "Name must be at most 100 characters"),
 
   email: z
-    .string({ required_error: "Email is required" })
+    .string({
+      error: (issue) => (issue.input === undefined ? "Email is required" : "Email must be a string"),
+    })
     .trim()
     .email("Invalid email address")
     .toLowerCase(),

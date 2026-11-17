@@ -1,5 +1,6 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
+const { requireAuth, optionalAuth } = require("../lib/auth");
 
 const router = express.Router();
 
@@ -38,10 +39,9 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/:slug", async (req, res) => {
+router.get("/:slug", optionalAuth, async (req, res) => {
   try {
     const { slug } = req.params;
-    const { userId } = req.query;
 
     const contest = await prisma.contest.findUnique({
       where: { slug },
@@ -62,12 +62,12 @@ router.get("/:slug", async (req, res) => {
     }
 
     let isRegistered = false;
-    if (userId) {
+    if (req.authUser) {
       const reg = await prisma.contestRegistration.findUnique({
         where: {
           contestId_userId: {
             contestId: contest.id,
-            userId,
+            userId: req.authUser.id,
           },
         },
       });
@@ -87,14 +87,10 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-router.post("/:id/register", async (req, res) => {
+router.post("/:id/register", requireAuth, async (req, res) => {
   try {
-    const { userId } = req.body;
+    const userId = req.authUser.id;
     const contestId = req.params.id;
-
-    if (!userId) {
-      return res.status(400).json({ success: false, message: "User ID is required" });
-    }
 
     const contest = await prisma.contest.findUnique({ where: { id: contestId } });
     if (!contest) {

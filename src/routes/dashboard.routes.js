@@ -1,9 +1,28 @@
 const express = require("express");
 const prisma = require("../lib/prisma");
+const { requireAuth, requireAdmin } = require("../lib/auth");
 
 const router = express.Router();
 
-router.get("/stats", async (req, res) => {
+router.get("/public-stats", async (req, res) => {
+  try {
+    const [publishedCourses, totalProblems, totalUsers] = await Promise.all([
+      prisma.course.count({ where: { isPublished: true } }),
+      prisma.dsaProblem.count(),
+      prisma.user.count(),
+    ]);
+
+    return res.json({
+      success: true,
+      data: { stats: { publishedCourses, totalProblems, totalUsers } },
+    });
+  } catch (error) {
+    console.error("Fetch public dashboard stats error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch public stats" });
+  }
+});
+
+router.get("/stats", requireAuth, requireAdmin, async (req, res) => {
   try {
     const [
       totalUsers,

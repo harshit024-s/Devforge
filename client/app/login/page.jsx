@@ -23,7 +23,7 @@ export default function LoginPage() {
 
     try {
       const data = await authAPI.login(email, password);
-      login(data.data.user);
+      login(data.data.user, data.data.token);
       setMessage({ type: "success", text: "Login successful! Redirecting..." });
       
       setTimeout(() => {

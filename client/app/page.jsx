@@ -200,7 +200,7 @@ export default function HomePage() {
 
     async function loadData() {
       try {
-        const statsRes = await dashboardAPI.getStats();
+        const statsRes = await dashboardAPI.getPublicStats();
         if (isMounted && statsRes?.success && statsRes?.data?.stats) {
           const s = statsRes.data.stats;
           setStats({

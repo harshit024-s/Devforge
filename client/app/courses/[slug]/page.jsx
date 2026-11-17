@@ -37,7 +37,7 @@ export default function CourseDetailPage() {
 
   async function checkEnrollment() {
     try {
-      const res = await coursesAPI.getEnrollmentStatus(course.id, user.id);
+      const res = await coursesAPI.getEnrollmentStatus(course.id);
       setIsEnrolled(res.enrolled);
     } catch (e) {
       console.error("Failed to check enrollment:", e);
@@ -71,7 +71,7 @@ export default function CourseDetailPage() {
 
     try {
       setEnrolling(true);
-      await coursesAPI.enroll(course.id, user.id);
+      await coursesAPI.enroll(course.id);
       setIsEnrolled(true);
       setNotification({
         type: "success",
